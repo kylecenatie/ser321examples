@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 
 class WebServer {
   public static void main(String args[]) {
-    WebServer server = new WebServer(9000);
+    WebServer server = new WebServer(8080);
   }
 
   /**
@@ -200,20 +200,26 @@ class WebServer {
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
-
+	try{
           // extract required fields from parameters
           Integer num1 = Integer.parseInt(query_pairs.get("num1"));
           Integer num2 = Integer.parseInt(query_pairs.get("num2"));
-
+	if(num1==null || num2==null){
+		throw new IllegalArgumentException();
+	}
           // do math
           Integer result = num1 * num2;
-
           // Generate response
           builder.append("HTTP/1.1 200 OK\n");
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
           builder.append("Result is: " + result);
-
+	}catch (Exception e){
+		builder.append("HTTP/1.1 406 Not Acceptable\n");
+		builder.append("Content-Type: text/html; charset=utf-9\n");
+		builder.append("\n");
+		builder.append("Needs to be two numbers for this request");
+	}
           // TODO: Include error handling here with a correct error code and
           // a response that makes sense
 
