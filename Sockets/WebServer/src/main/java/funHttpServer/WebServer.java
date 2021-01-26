@@ -16,6 +16,7 @@ write a response back
 
 package funHttpServer;
 
+import org.json.*;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -235,9 +236,30 @@ class WebServer {
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
           query_pairs = splitQuery(request.replace("github?", ""));
           String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
+          //System.out.println(json);
+	  JSONArray repoArray = new JSONArray(json);
+		 String gitResult = "This is the result: \n";
 
-          builder.append("Check the todos mentioned in the Java source file");
+          for(int i=0; i<repoArray.length(); i++){
+            // now we have a JSON object, one repo
+            JSONObject repo = repoArray.getJSONObject(i);
+            String repoName = repo.getString("name");
+            // owner is a JSON object in the repo object, get it and save it in own variable then read the login name and id
+            JSONObject owner = repo.getJSONObject("owner");
+            String ownername = owner.getString("login");
+            int ownId = owner.getInt("id");
+
+              gitResult += ownername + ", " + ownId + " -> " + repoName + "\t" + "\n";
+	      gitResult += "\n";
+	  }
+
+          builder.append("HTTP/1.1 200 OK\n");
+          builder.append("Content-Type: text/html; charset=utf-8\n");
+          builder.append("\n");
+          builder.append(gitResult);
+          
+
+          //builder.append("Check the todos mentioned in the Java source file");
           // TODO: Parse the JSON returned by your fetch and create an appropriate
           // response
           // and list the owner name, owner id and name of the public repo on your webpage, e.g.
